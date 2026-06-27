@@ -1,27 +1,74 @@
 "use server"
 
-import { auth } from "@/auth"
-import { createWorkspaceRequest, fetchWorkspaces } from "@/lib/api"
-import type { CreateWorkspaceRequest, Workspace } from "@/types/types"
+import { auth, unstable_update } from "@/auth"
+import {
+  ApiRequestError,
+  createWorkspaceRequest,
+  fetchWorkspaces,
+  withTokenRefresh,
+} from "@/lib/api"
+import type {
+  ActionResult,
+  ApiError,
+  AuthResponse,
+  CreateWorkspaceRequest,
+  Workspace,
+} from "@/types/types"
 
-export async function getWorkspaces(): Promise<Workspace[]> {
+async function persistRefreshedTokens(tokens: AuthResponse) {
+  await unstable_update({
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  })
+}
+
+async function withSessionTokens<T>(
+  requestFn: (accessToken: string) => Promise<T>,
+): Promise<T> {
   const session = await auth()
 
-  if (!session?.accessToken) {
-    throw new Error("Unauthorized")
+  if (!session?.accessToken || !session.refreshToken) {
+    throw new ApiRequestError({
+      status: 401,
+      message: "Unauthorized",
+    })
   }
 
-  return fetchWorkspaces(session.accessToken)
+  return withTokenRefresh(
+    {
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+    },
+    requestFn,
+    persistRefreshedTokens,
+  )
+}
+
+function toActionError(error: unknown): ApiError {
+  if (error instanceof ApiRequestError) {
+    return error.apiError
+  }
+
+  return {
+    status: 500,
+    message: "Something went wrong. Please try again.",
+  }
+}
+
+export async function getWorkspaces(): Promise<Workspace[]> {
+  return withSessionTokens(fetchWorkspaces)
 }
 
 export async function createWorkspace(
   data: CreateWorkspaceRequest,
-): Promise<Workspace> {
-  const session = await auth()
+): Promise<ActionResult<Workspace>> {
+  try {
+    const workspace = await withSessionTokens((accessToken) =>
+      createWorkspaceRequest(accessToken, data),
+    )
 
-  if (!session?.accessToken) {
-    throw new Error("Unauthorized")
+    return { success: true, data: workspace }
+  } catch (error) {
+    return { success: false, error: toActionError(error) }
   }
-
-  return createWorkspaceRequest(session.accessToken, data)
 }

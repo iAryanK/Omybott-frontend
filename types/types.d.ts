@@ -1,7 +1,12 @@
 export type ApiError = {
+  status?: number
   message?: string
   subErrors?: string[]
 }
+
+export type ActionResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: ApiError }
 
 export type ApiResponseBody<T> = {
   data?: T
@@ -56,6 +61,7 @@ declare module "next-auth" {
     user: AppUser
     accessToken: string
     refreshToken: string
+    error?: "RefreshTokenError"
   }
 }
 
@@ -64,5 +70,6 @@ declare module "next-auth/jwt" {
     accessToken?: string
     refreshToken?: string
     user?: AppUser
+    error?: "RefreshTokenError"
   }
 }

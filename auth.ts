@@ -1,9 +1,10 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import { fetchCurrentUser, loginRequest } from "@/lib/api"
+import { isAccessTokenExpired } from "@/lib/auth-tokens"
+import { fetchCurrentUser, loginRequest, refreshTokenRequest } from "@/lib/api"
 import type { AppUser } from "@/types/types"
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   providers: [
     Credentials({
       name: "credentials",
@@ -46,7 +47,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         const authUser = user as AppUser & {
           accessToken: string
@@ -64,6 +65,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           createdAt: authUser.createdAt,
           updatedAt: authUser.updatedAt,
         }
+        delete token.error
+      }
+
+      if (trigger === "update" && session) {
+        const updatedSession = session as {
+          accessToken?: string
+          refreshToken?: string
+        }
+
+        if (updatedSession.accessToken) {
+          token.accessToken = updatedSession.accessToken
+        }
+
+        if (updatedSession.refreshToken) {
+          token.refreshToken = updatedSession.refreshToken
+        }
+
+        delete token.error
+      }
+
+      const accessToken = token.accessToken as string | undefined
+      const refreshToken = token.refreshToken as string | undefined
+
+      if (
+        accessToken &&
+        refreshToken &&
+        isAccessTokenExpired(accessToken)
+      ) {
+        try {
+          const refreshedTokens = await refreshTokenRequest(refreshToken)
+          token.accessToken = refreshedTokens.accessToken
+          token.refreshToken = refreshedTokens.refreshToken
+          delete token.error
+        } catch {
+          token.error = "RefreshTokenError"
+        }
       }
 
       return token
@@ -77,6 +114,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       session.accessToken = (token.accessToken as string | undefined) ?? ""
       session.refreshToken = (token.refreshToken as string | undefined) ?? ""
+      session.error = token.error as "RefreshTokenError" | undefined
 
       return session
     },

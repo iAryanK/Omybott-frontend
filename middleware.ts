@@ -1,7 +1,8 @@
 import { auth } from "@/auth"
 
 export default auth((req) => {
-  const isLoggedIn = !!req.auth
+  const session = req.auth
+  const isLoggedIn = !!session && session.error !== "RefreshTokenError"
   const { pathname } = req.nextUrl
 
   const isAuthRoute = pathname === "/login" || pathname === "/register"

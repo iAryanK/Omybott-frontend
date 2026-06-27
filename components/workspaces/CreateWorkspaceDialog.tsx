@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useState, type ReactNode } from "react"
 import { createWorkspace } from "@/lib/actions/workspaces"
+import { formatApiError } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -42,10 +43,16 @@ const CreateWorkspaceDialog = ({ children }: { children: ReactNode }) => {
     setIsSubmitting(true)
 
     try {
-      const workspace = await createWorkspace({ name: name.trim(), active })
+      const result = await createWorkspace({ name: name.trim(), active })
+
+      if (!result.success) {
+        setError(formatApiError(result.error))
+        return
+      }
+
       setOpen(false)
       resetForm()
-      router.push(`/${workspace.id}`)
+      router.push(`/${result.data.id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create workspace")
     } finally {

@@ -1,4 +1,5 @@
 import type {
+  ApiError,
   ApiResponseBody,
   AppUser,
   AuthResponse,
@@ -11,45 +12,76 @@ export function getApiBaseUrl() {
   return process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"
 }
 
-export async function parseErrorMessage(response: Response): Promise<string> {
-  try {
-    const body = (await response.json()) as ApiResponseBody<unknown>
-    const message = body.error?.message
-    const subErrors = body.error?.subErrors
+export class ApiRequestError extends Error {
+  apiError: ApiError
 
-    if (subErrors?.length) {
-      return subErrors.join(", ")
-    }
+  constructor(apiError: ApiError) {
+    super(apiError.subErrors?.join(", ") ?? apiError.message ?? "Something went wrong. Please try again.")
+    this.name = "ApiRequestError"
+    this.apiError = apiError
+  }
+}
 
-    if (message) {
-      return message
-    }
-  } catch {
-    // fall through to default message
+export function formatApiError(error: ApiError): string {
+  if (error.subErrors?.length) {
+    return error.subErrors.join(", ")
   }
 
-  return "Something went wrong. Please try again."
+  return error.message ?? "Something went wrong. Please try again."
+}
+
+async function readApiResponseBody<T>(
+  response: Response,
+): Promise<ApiResponseBody<T>> {
+  return (await response.json()) as ApiResponseBody<T>
+}
+
+export async function parseApiError(response: Response): Promise<ApiError> {
+  const fallback: ApiError = {
+    status: response.status,
+    message: "Something went wrong. Please try again.",
+  }
+
+  try {
+    const body = await readApiResponseBody<unknown>(response)
+
+    return {
+      status: response.status,
+      message: body.error?.message ?? fallback.message,
+      subErrors: body.error?.subErrors,
+    }
+  } catch {
+    return fallback
+  }
+}
+
+export async function parseErrorMessage(response: Response): Promise<string> {
+  return formatApiError(await parseApiError(response))
 }
 
 export async function parseApiResponse<T>(response: Response): Promise<T> {
-  const body = (await response.json()) as ApiResponseBody<T>
+  const body = await readApiResponseBody<T>(response)
 
   if (!response.ok) {
-    const message = body.error?.message
-    const subErrors = body.error?.subErrors
-
-    if (subErrors?.length) {
-      throw new Error(subErrors.join(", "))
-    }
-
-    throw new Error(message ?? "Something went wrong. Please try again.")
+    throw new ApiRequestError({
+      status: response.status,
+      message: body.error?.message,
+      subErrors: body.error?.subErrors,
+    })
   }
 
   if (body.data === undefined) {
-    throw new Error("Invalid response from server")
+    throw new ApiRequestError({
+      status: response.status,
+      message: "Invalid response from server",
+    })
   }
 
   return body.data
+}
+
+function isUnauthorizedError(error: ApiRequestError): boolean {
+  return error.apiError.status === 401
 }
 
 type RawUser = {
@@ -72,6 +104,42 @@ export function sanitizeUser(raw: RawUser): AppUser {
     active: raw.active ?? true,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
+  }
+}
+
+export async function refreshTokenRequest(
+  refreshToken: string,
+): Promise<AuthResponse> {
+  const response = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
+    method: "POST",
+    headers: {
+      Cookie: `refreshToken=${refreshToken}`,
+    },
+  })
+
+  return parseApiResponse<AuthResponse>(response)
+}
+
+export async function withTokenRefresh<T>(
+  tokens: { accessToken: string; refreshToken: string },
+  requestFn: (accessToken: string) => Promise<T>,
+  onTokensRefreshed?: (tokens: AuthResponse) => Promise<void>,
+): Promise<T> {
+  try {
+    return await requestFn(tokens.accessToken)
+  } catch (error) {
+    if (
+      !(error instanceof ApiRequestError) ||
+      !isUnauthorizedError(error) ||
+      !tokens.refreshToken
+    ) {
+      throw error
+    }
+
+    const refreshedTokens = await refreshTokenRequest(tokens.refreshToken)
+    await onTokensRefreshed?.(refreshedTokens)
+
+    return requestFn(refreshedTokens.accessToken)
   }
 }
 
@@ -104,7 +172,7 @@ export async function registerUser(data: SignupRequest): Promise<void> {
   })
 
   if (!response.ok) {
-    throw new Error(await parseErrorMessage(response))
+    throw new ApiRequestError(await parseApiError(response))
   }
 }
 
@@ -114,7 +182,7 @@ export async function fetchCurrentUser(accessToken: string): Promise<AppUser> {
   })
 
   if (!response.ok) {
-    throw new Error(await parseErrorMessage(response))
+    throw new ApiRequestError(await parseApiError(response))
   }
 
   const raw = await parseApiResponse<RawUser>(response)
@@ -127,7 +195,7 @@ export async function fetchWorkspaces(accessToken: string): Promise<Workspace[]>
   })
 
   if (!response.ok) {
-    throw new Error(await parseErrorMessage(response))
+    throw new ApiRequestError(await parseApiError(response))
   }
 
   return parseApiResponse<Workspace[]>(response)
@@ -147,7 +215,7 @@ export async function createWorkspaceRequest(
   })
 
   if (!response.ok) {
-    throw new Error(await parseErrorMessage(response))
+    throw new ApiRequestError(await parseApiError(response))
   }
 
   return parseApiResponse<Workspace>(response)
