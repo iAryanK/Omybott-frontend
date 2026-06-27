@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, JetBrains_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AuthSessionProvider } from "@/components/providers/session-provider";
+import { ModeToggle } from "@/components/shared/ThemeToggle";
 
 const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -53,7 +55,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <AuthSessionProvider>{children}</AuthSessionProvider>
+          <div className="absolute top-4 right-4"><ModeToggle /></div>
         </ThemeProvider>
       </body>
     </html>

@@ -1,6 +1,11 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -11,17 +16,49 @@ import {
 } from "@/components/ui/card"
 import {
   Field,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import Logo from "../shared/Logo"
-import Image from "next/image"
+
+type LoginFormValues = {
+  email: string
+  password: string
+}
 
 const LoginForm = () => {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const router = useRouter()
+  const [apiError, setApiError] = useState<string | null>(null)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>()
+
+  const onSubmit = async (values: LoginFormValues) => {
+    setApiError(null)
+
+    try {
+      const result = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setApiError("Invalid email or password")
+        return
+      }
+
+      router.push("/")
+      router.refresh()
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : "Failed to sign in")
+    }
   }
 
   return (
@@ -32,34 +69,50 @@ const LoginForm = () => {
         <CardDescription>Sign in to your Omybott account</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <FieldGroup>
-            <Field>
+            <Field data-invalid={!!errors.email}>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
-                name="email"
                 type="email"
                 placeholder="you@example.com"
                 autoComplete="email"
-                required
+                aria-invalid={!!errors.email}
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Enter a valid email address",
+                  },
+                })}
               />
+              <FieldError errors={[errors.email]} />
             </Field>
-            <Field>
+            <Field data-invalid={!!errors.password}>
               <FieldLabel htmlFor="password">Password</FieldLabel>
               <Input
                 id="password"
-                name="password"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
-                required
+                aria-invalid={!!errors.password}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 5,
+                    message: "Password must be at least 5 characters",
+                  },
+                })}
               />
+              <FieldError errors={[errors.password]} />
             </Field>
           </FieldGroup>
 
-          <Button type="submit" className="w-full" size="lg">
-            Sign in
+          {apiError && <FieldError>{apiError}</FieldError>}
+
+          <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in..." : "Sign in"}
           </Button>
 
           <FieldSeparator>Or continue with</FieldSeparator>
