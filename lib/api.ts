@@ -2,7 +2,9 @@ import type {
   ApiResponseBody,
   AppUser,
   AuthResponse,
+  CreateWorkspaceRequest,
   SignupRequest,
+  Workspace,
 } from "@/types/types"
 
 export function getApiBaseUrl() {
@@ -117,4 +119,36 @@ export async function fetchCurrentUser(accessToken: string): Promise<AppUser> {
 
   const raw = await parseApiResponse<RawUser>(response)
   return sanitizeUser(raw)
+}
+
+export async function fetchWorkspaces(accessToken: string): Promise<Workspace[]> {
+  const response = await fetch(`${getApiBaseUrl()}/workspaces`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+
+  if (!response.ok) {
+    throw new Error(await parseErrorMessage(response))
+  }
+
+  return parseApiResponse<Workspace[]>(response)
+}
+
+export async function createWorkspaceRequest(
+  accessToken: string,
+  data: CreateWorkspaceRequest,
+): Promise<Workspace> {
+  const response = await fetch(`${getApiBaseUrl()}/workspaces`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    throw new Error(await parseErrorMessage(response))
+  }
+
+  return parseApiResponse<Workspace>(response)
 }

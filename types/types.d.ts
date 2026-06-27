@@ -39,6 +39,18 @@ export type AppUser = {
   updatedAt?: string
 }
 
+export type Workspace = {
+  id: string
+  name: string
+  slug: string
+  active: boolean
+}
+
+export type CreateWorkspaceRequest = {
+  name: string
+  active: boolean
+}
+
 declare module "next-auth" {
   interface Session {
     user: AppUser

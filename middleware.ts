@@ -5,7 +5,11 @@ export default auth((req) => {
   const { pathname } = req.nextUrl
 
   const isAuthRoute = pathname === "/login" || pathname === "/register"
-  const isProtectedRoute = pathname === "/"
+  const isProtectedRoute =
+    pathname === "/" ||
+    /^\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      pathname,
+    )
 
   if (isProtectedRoute && !isLoggedIn) {
     return Response.redirect(new URL("/login", req.nextUrl))
@@ -17,5 +21,5 @@ export default auth((req) => {
 })
 
 export const config = {
-  matcher: ["/", "/login", "/register"],
+  matcher: ["/", "/login", "/register", "/:workspaceId"],
 }
