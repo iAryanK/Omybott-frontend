@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -54,7 +55,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthSessionProvider>{children}</AuthSessionProvider>
+          
+          <AuthSessionProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+          </AuthSessionProvider>
         </ThemeProvider>
       </body>
     </html>

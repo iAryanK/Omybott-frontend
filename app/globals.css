@@ -127,4 +127,16 @@
   html {
     @apply font-mono;
   }
+
+  .scrollbar-thin {
+    @apply scrollbar-thin;
+  }
+
+  .scrollbar-gutter-stable {
+    @apply scrollbar-gutter-stable;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    width: 0px;
+  }
 }
