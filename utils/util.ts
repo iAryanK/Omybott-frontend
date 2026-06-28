@@ -20,3 +20,7 @@ export function getIconColor(name: string) {
 export function getInitial(name: string) {
     return name.trim().charAt(0).toUpperCase() || "W"
   }
+
+export function generateWorkspaceSlug(name: string) {
+  return name.replace(/ /g, "_").trim()
+}

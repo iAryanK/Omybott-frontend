@@ -16,24 +16,24 @@ import {
 } from "@/components/ui/dialog"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
+import { generateWorkspaceSlug } from "@/utils/util"
 
 const CreateWorkspaceDialog = ({ children }: { children: ReactNode }) => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
-  const [active, setActive] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const slug = generateWorkspaceSlug(name)
 
   const resetForm = () => {
     setName("")
-    setActive(true)
     setError(null)
   }
 
@@ -43,7 +43,7 @@ const CreateWorkspaceDialog = ({ children }: { children: ReactNode }) => {
     setIsSubmitting(true)
 
     try {
-      const result = await createWorkspace({ name: name.trim(), active })
+      const result = await createWorkspace({ name: name.trim(), active: true })
 
       if (!result.success) {
         setError(formatApiError(result.error))
@@ -90,15 +90,11 @@ const CreateWorkspaceDialog = ({ children }: { children: ReactNode }) => {
                 required
                 disabled={isSubmitting}
               />
-            </Field>
-            <Field orientation="horizontal">
-              <FieldLabel htmlFor="workspace-active">Active</FieldLabel>
-              <Switch
-                id="workspace-active"
-                checked={active}
-                onCheckedChange={setActive}
-                disabled={isSubmitting}
-              />
+              {name ? (
+                <FieldDescription className="text-green-600 dark:text-green-500">
+                  {slug}
+                </FieldDescription>
+              ) : null}
             </Field>
             {error ? <FieldError>{error}</FieldError> : null}
           </FieldGroup>

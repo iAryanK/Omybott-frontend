@@ -9,16 +9,16 @@ const HomePage = async () => {
   const workspaces = await getWorkspaces()
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 p-6">
+    <div className="flex h-[80vh] flex-col items-center justify-center gap-6 p-6">
       <h1 className="font-heading text-lg font-medium">Workspaces</h1>
 
-      <div className="grid grid-cols-4 gap-x-3 gap-y-5">
+      <div className="flex max-w-92 flex-wrap justify-center gap-x-3 gap-y-5">
         {workspaces.map((workspace) => (
           <Link
             key={workspace.id}
             href={`/${workspace.id}`}
             className={cn(
-              "group flex flex-col items-center gap-1.5 text-center",
+              "group flex w-16 flex-col items-center gap-1.5 text-center",
               !workspace.active && "opacity-50",
             )}
           >
@@ -39,7 +39,7 @@ const HomePage = async () => {
         <CreateWorkspaceDialog>
           <button
             type="button"
-            className="group flex flex-col items-center gap-1.5 text-center"
+            className="group flex w-16 flex-col items-center gap-1.5 text-center"
           >
             <div className="flex size-14 items-center justify-center rounded-xl bg-muted text-muted-foreground shadow-md transition-transform group-hover:scale-105">
               <PlusIcon className="size-6" />

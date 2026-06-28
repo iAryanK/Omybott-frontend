@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { LogOutIcon, UserIcon } from "lucide-react"
-import { signOut } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 
 import Logo from "@/components/shared/Logo"
 import { ModeToggle } from "@/components/shared/ThemeToggle"
@@ -22,10 +22,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
 export function DashboardNavbar() {
+  const { data: session } = useSession()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
 
@@ -54,7 +57,18 @@ export function DashboardNavbar() {
                   <UserIcon />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-medium text-foreground">
+                      {session?.user?.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {session?.user?.email}
+                    </span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
                   onSelect={(event) => {
