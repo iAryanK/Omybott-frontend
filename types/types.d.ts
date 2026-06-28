@@ -71,6 +71,16 @@ export type CreateWorkspaceRequest = {
   active: boolean
 }
 
+export type CreateBotRequest = {
+  name: string
+  description: string
+  slug: string
+  welcomeMessage: string
+  primaryColor: string
+  allowedDomains: string[]
+  status?: BotStatus
+}
+
 declare module "next-auth" {
   interface Session {
     user: AppUser

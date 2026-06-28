@@ -1,4 +1,5 @@
 import BotCard from "@/components/workspaces/BotCard"
+import CreateBotCard from "@/components/workspaces/CreateBotCard"
 import WorkspaceBotsEmpty from "@/components/workspaces/WorkspaceBotsEmpty"
 import type { Bot } from "@/types/types"
 
@@ -29,6 +30,7 @@ const WorkspaceBots = ({ workspaceId, bots }: WorkspaceBotsProps) => {
         {bots.map((bot) => (
           <BotCard key={bot.id} bot={bot} />
         ))}
+        <CreateBotCard workspaceId={workspaceId} />
       </div>
     </section>
   )

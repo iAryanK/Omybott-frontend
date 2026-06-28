@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
@@ -20,7 +21,9 @@ import VerticalFieldTimeline from "../VerticalFieldTimeline"
 type BasicInfoStepProps = {
   formData: CreateBotFormData
   onChange: (data: CreateBotFormData) => void
-  onComplete: () => void
+  onComplete: () => void | Promise<void>
+  isSubmitting?: boolean
+  error?: string | null
 }
 
 const BASIC_INFO_FIELDS = [
@@ -66,6 +69,8 @@ const BasicInfoStep = ({
   formData,
   onChange,
   onComplete,
+  isSubmitting = false,
+  error = null,
 }: BasicInfoStepProps) => {
   const [currentFieldIndex, setCurrentFieldIndex] = useState(0)
   const [maxReachedIndex, setMaxReachedIndex] = useState(0)
@@ -108,15 +113,15 @@ const BasicInfoStep = ({
     }
   }
 
-  const handleContinue = () => {
-    if (!canContinue()) return
+  const handleContinue = async () => {
+    if (!canContinue() || isSubmitting) return
 
     if (currentFieldIndex === 0) {
       updateForm({ slug: generateWorkspaceSlug(formData.name) })
     }
 
     if (currentFieldIndex === 4) {
-      onComplete()
+      await onComplete()
       return
     }
 
@@ -137,12 +142,12 @@ const BasicInfoStep = ({
     event: React.KeyboardEvent,
     { multiline = false }: { multiline?: boolean } = {},
   ) => {
-    if (event.key !== "Enter" || (multiline && event.shiftKey)) {
+    if (event.key !== "Enter" || (multiline && event.shiftKey) || isSubmitting) {
       return
     }
 
     event.preventDefault()
-    handleContinue()
+    void handleContinue()
   }
 
   const renderField = (index: number, isActive: boolean) => {
@@ -166,6 +171,7 @@ const BasicInfoStep = ({
                 }
                 placeholder="Support Assistant"
                 autoFocus={isActive}
+                disabled={isSubmitting}
               />
               {formData.name.trim() ? (
                 <FieldDescription className="text-primary">
@@ -193,6 +199,7 @@ const BasicInfoStep = ({
                 }
                 placeholder="Helps customers with product questions and support."
                 autoFocus={isActive}
+                disabled={isSubmitting}
               />
             </Field>
           </FieldGroup>
@@ -211,6 +218,7 @@ const BasicInfoStep = ({
                     updateForm({ primaryColor: event.target.value })
                   }
                   className="h-9 w-14 cursor-pointer p-1"
+                  disabled={isSubmitting}
                 />
                 <Input
                   value={formData.primaryColor}
@@ -222,6 +230,7 @@ const BasicInfoStep = ({
                   }
                   placeholder="#e07b39"
                   className="font-mono uppercase"
+                  disabled={isSubmitting}
                 />
               </div>
             </Field>
@@ -247,6 +256,7 @@ const BasicInfoStep = ({
                 }
                 placeholder="Hi! How can I help you today?"
                 autoFocus={isActive}
+                disabled={isSubmitting}
               />
             </Field>
           </FieldGroup>
@@ -272,6 +282,7 @@ const BasicInfoStep = ({
                 }
                 placeholder="example.com, app.example.com"
                 autoFocus={isActive}
+                disabled={isSubmitting}
               />
               <FieldDescription>
                 Separate multiple domains with commas.
@@ -306,12 +317,17 @@ const BasicInfoStep = ({
         />
       </div>
 
-      <div className="mt-6 flex justify-end pt-4">
-        <Button type="button" onClick={handleContinue} disabled={!canContinue()}>
+      <div className="mt-6 flex flex-col items-end gap-2 pt-4">
+        {error ? <FieldError className="w-full">{error}</FieldError> : null}
+        <Button
+          type="button"
+          onClick={() => void handleContinue()}
+          disabled={!canContinue() || isSubmitting}
+        >
           {isLastField ? (
             <>
               <SparklesIcon data-icon="inline-start" />
-              Create bot
+              {isSubmitting ? "Creating..." : "Create bot"}
             </>
           ) : (
             <>

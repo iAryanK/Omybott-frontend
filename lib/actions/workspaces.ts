@@ -3,6 +3,7 @@
 import { auth, unstable_update } from "@/auth"
 import {
   ApiRequestError,
+  createBotRequest,
   createWorkspaceRequest,
   fetchWorkspace,
   fetchWorkspaceBots,
@@ -14,6 +15,7 @@ import type {
   ApiError,
   AuthResponse,
   Bot,
+  CreateBotRequest,
   CreateWorkspaceRequest,
   Workspace,
 } from "@/types/types"
@@ -83,6 +85,21 @@ export async function createWorkspace(
     )
 
     return { success: true, data: workspace }
+  } catch (error) {
+    return { success: false, error: toActionError(error) }
+  }
+}
+
+export async function createBot(
+  workspaceId: string,
+  data: CreateBotRequest,
+): Promise<ActionResult<Bot>> {
+  try {
+    const bot = await withSessionTokens((accessToken) =>
+      createBotRequest(accessToken, workspaceId, data),
+    )
+
+    return { success: true, data: bot }
   } catch (error) {
     return { success: false, error: toActionError(error) }
   }
