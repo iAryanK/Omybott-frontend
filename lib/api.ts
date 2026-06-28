@@ -3,6 +3,7 @@ import type {
   ApiResponseBody,
   AppUser,
   AuthResponse,
+  Bot,
   CreateWorkspaceRequest,
   SignupRequest,
   Workspace,
@@ -199,6 +200,39 @@ export async function fetchWorkspaces(accessToken: string): Promise<Workspace[]>
   }
 
   return parseApiResponse<Workspace[]>(response)
+}
+
+export async function fetchWorkspace(
+  accessToken: string,
+  workspaceId: string,
+): Promise<Workspace> {
+  const response = await fetch(`${getApiBaseUrl()}/workspaces/${workspaceId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<Workspace>(response)
+}
+
+export async function fetchWorkspaceBots(
+  accessToken: string,
+  workspaceId: string,
+): Promise<Bot[]> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/workspaces/${workspaceId}/bots`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  )
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<Bot[]>(response)
 }
 
 export async function createWorkspaceRequest(

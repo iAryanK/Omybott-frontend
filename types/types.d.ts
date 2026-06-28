@@ -49,6 +49,21 @@ export type Workspace = {
   name: string
   slug: string
   active: boolean
+  createdAt?: string
+  updatedAt?: string
+}
+
+export type BotStatus = "ACTIVE" | "INACTIVE"
+
+export type Bot = {
+  id: string
+  name: string
+  description?: string
+  slug: string
+  welcomeMessage: string
+  primaryColor: string
+  allowedDomains?: string[]
+  status: BotStatus
 }
 
 export type CreateWorkspaceRequest = {

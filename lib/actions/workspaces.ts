@@ -4,6 +4,8 @@ import { auth, unstable_update } from "@/auth"
 import {
   ApiRequestError,
   createWorkspaceRequest,
+  fetchWorkspace,
+  fetchWorkspaceBots,
   fetchWorkspaces,
   withTokenRefresh,
 } from "@/lib/api"
@@ -11,6 +13,7 @@ import type {
   ActionResult,
   ApiError,
   AuthResponse,
+  Bot,
   CreateWorkspaceRequest,
   Workspace,
 } from "@/types/types"
@@ -57,6 +60,18 @@ function toActionError(error: unknown): ApiError {
 
 export async function getWorkspaces(): Promise<Workspace[]> {
   return withSessionTokens(fetchWorkspaces)
+}
+
+export async function getWorkspace(workspaceId: string): Promise<Workspace> {
+  return withSessionTokens((accessToken) =>
+    fetchWorkspace(accessToken, workspaceId),
+  )
+}
+
+export async function getWorkspaceBots(workspaceId: string): Promise<Bot[]> {
+  return withSessionTokens((accessToken) =>
+    fetchWorkspaceBots(accessToken, workspaceId),
+  )
 }
 
 export async function createWorkspace(
