@@ -2,19 +2,11 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import type { Workspace } from "@/types/types"
+import { formatDateTime } from "@/utils/date"
 import { getIconColor, getInitial } from "@/utils/util"
 
 type WorkspaceDetailsProps = {
   workspace: Workspace
-}
-
-function formatDate(value?: string) {
-  if (!value) return "—"
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
 }
 
 const WorkspaceDetails = ({ workspace }: WorkspaceDetailsProps) => {
@@ -47,12 +39,12 @@ const WorkspaceDetails = ({ workspace }: WorkspaceDetailsProps) => {
         <div className="flex flex-col flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:justify-end">
           <div className="flex items-center gap-2">
             <span className="font-medium text-foreground/70">Created</span>
-            <span>{formatDate(workspace.createdAt)}</span>
+            <span>{formatDateTime(workspace.createdAt)}</span>
           </div>
           {/* <Separator orientation="vertical" className="hidden h-4 sm:block" /> */}
           <div className="flex items-center gap-2">
             <span className="font-medium text-foreground/70">Updated</span>
-            <span>{formatDate(workspace.updatedAt)}</span>
+            <span>{formatDateTime(workspace.updatedAt)}</span>
           </div>
         </div>
       </div>

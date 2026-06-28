@@ -1,18 +1,10 @@
 import { Badge } from "@/components/ui/badge"
 import type { Bot } from "@/types/types"
+import { formatDateTime } from "@/utils/date"
 import { getInitial } from "@/utils/util"
 
 type BotDetailsProps = {
   bot: Bot
-}
-
-function formatDate(value?: string) {
-  if (!value) return "—"
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value))
 }
 
 const BotDetails = ({ bot }: BotDetailsProps) => {
@@ -43,11 +35,11 @@ const BotDetails = ({ bot }: BotDetailsProps) => {
         <div className="flex flex-col flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:justify-end">
           <div className="flex items-center gap-2">
             <span className="font-medium text-foreground/70">Created</span>
-            <span>{formatDate(bot.createdAt)}</span>
+            <span>{formatDateTime(bot.createdAt)}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="font-medium text-foreground/70">Updated</span>
-            <span>{formatDate(bot.updatedAt)}</span>
+            <span>{formatDateTime(bot.updatedAt)}</span>
           </div>
         </div>
       </div>
