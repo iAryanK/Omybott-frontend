@@ -28,7 +28,7 @@ const WorkspaceBots = ({ workspaceId, bots }: WorkspaceBotsProps) => {
 
       <div className="flex flex-wrap gap-4">
         {bots.map((bot) => (
-          <BotCard key={bot.id} bot={bot} />
+          <BotCard key={bot.id} bot={bot} workspaceId={workspaceId} />
         ))}
         <CreateBotCard workspaceId={workspaceId} />
       </div>

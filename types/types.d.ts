@@ -64,6 +64,8 @@ export type Bot = {
   primaryColor: string
   allowedDomains?: string[]
   status: BotStatus
+  createdAt?: string
+  updatedAt?: string
 }
 
 export type CreateWorkspaceRequest = {
@@ -79,6 +81,16 @@ export type CreateBotRequest = {
   primaryColor: string
   allowedDomains: string[]
   status?: BotStatus
+}
+
+export type UpdateBotRequest = {
+  name: string
+  description: string
+  slug: string
+  welcomeMessage: string
+  primaryColor: string
+  allowedDomains: string[]
+  status: BotStatus
 }
 
 declare module "next-auth" {

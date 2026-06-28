@@ -5,9 +5,11 @@ import {
   ApiRequestError,
   createBotRequest,
   createWorkspaceRequest,
+  fetchBot,
   fetchWorkspace,
   fetchWorkspaceBots,
   fetchWorkspaces,
+  patchBotRequest,
   withTokenRefresh,
 } from "@/lib/api"
 import type {
@@ -17,6 +19,7 @@ import type {
   Bot,
   CreateBotRequest,
   CreateWorkspaceRequest,
+  UpdateBotRequest,
   Workspace,
 } from "@/types/types"
 
@@ -76,6 +79,10 @@ export async function getWorkspaceBots(workspaceId: string): Promise<Bot[]> {
   )
 }
 
+export async function getBot(botId: string): Promise<Bot> {
+  return withSessionTokens((accessToken) => fetchBot(accessToken, botId))
+}
+
 export async function createWorkspace(
   data: CreateWorkspaceRequest,
 ): Promise<ActionResult<Workspace>> {
@@ -97,6 +104,21 @@ export async function createBot(
   try {
     const bot = await withSessionTokens((accessToken) =>
       createBotRequest(accessToken, workspaceId, data),
+    )
+
+    return { success: true, data: bot }
+  } catch (error) {
+    return { success: false, error: toActionError(error) }
+  }
+}
+
+export async function updateBot(
+  botId: string,
+  data: UpdateBotRequest,
+): Promise<ActionResult<Bot>> {
+  try {
+    const bot = await withSessionTokens((accessToken) =>
+      patchBotRequest(accessToken, botId, data),
     )
 
     return { success: true, data: bot }

@@ -14,9 +14,9 @@ export default function HomeLayout({
 }>) {
   return (
     <main className="h-full">
-      <div className="mx-auto flex h-full max-w-5xl flex-col">
+      <div className="mx-auto flex h-full min-h-0 max-w-5xl flex-col">
         <DashboardNavbar />
-        {children}
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       </div>
     </main>
   );

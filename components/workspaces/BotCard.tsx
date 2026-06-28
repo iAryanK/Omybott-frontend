@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type { Bot } from "@/types/types"
@@ -5,17 +7,19 @@ import { getInitial } from "@/utils/util"
 
 type BotCardProps = {
   bot: Bot
+  workspaceId: string
 }
 
 function truncateId(id: string) {
   return `${id.slice(0, 8)}…${id.slice(-4)}`
 }
 
-const BotCard = ({ bot }: BotCardProps) => {
+const BotCard = ({ bot, workspaceId }: BotCardProps) => {
   const domains = bot.allowedDomains ?? []
 
   return (
-    <article
+    <Link
+      href={`/${workspaceId}/${bot.id}`}
       className={cn(
         "flex w-72 shrink-0 flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10",
         "aspect-[1.586/1] shadow-sm transition-shadow hover:shadow-md",
@@ -84,7 +88,7 @@ const BotCard = ({ bot }: BotCardProps) => {
           </div>
         </div>
       </div>
-    </article>
+    </Link>
   )
 }
 

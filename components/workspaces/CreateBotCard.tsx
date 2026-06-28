@@ -20,7 +20,7 @@ const CreateBotCard = ({ workspaceId }: CreateBotCardProps) => {
       <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <PlusIcon className="size-5" />
       </div>
-      <span className="text-xs font-medium text-muted-foreground">Create bot</span>
+      <span className="text-xs font-medium text-muted-foreground">Add bot</span>
     </Link>
   )
 }

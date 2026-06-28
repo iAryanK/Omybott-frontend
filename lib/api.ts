@@ -7,6 +7,7 @@ import type {
   CreateBotRequest,
   CreateWorkspaceRequest,
   SignupRequest,
+  UpdateBotRequest,
   Workspace,
 } from "@/types/types"
 
@@ -236,6 +237,21 @@ export async function fetchWorkspaceBots(
   return parseApiResponse<Bot[]>(response)
 }
 
+export async function fetchBot(
+  accessToken: string,
+  botId: string,
+): Promise<Bot> {
+  const response = await fetch(`${getApiBaseUrl()}/bots/${botId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<Bot>(response)
+}
+
 export async function createBotRequest(
   accessToken: string,
   workspaceId: string,
@@ -255,6 +271,27 @@ export async function createBotRequest(
       }),
     },
   )
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<Bot>(response)
+}
+
+export async function patchBotRequest(
+  accessToken: string,
+  botId: string,
+  data: UpdateBotRequest,
+): Promise<Bot> {
+  const response = await fetch(`${getApiBaseUrl()}/bots/${botId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(data),
+  })
 
   if (!response.ok) {
     throw new ApiRequestError(await parseApiError(response))
