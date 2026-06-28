@@ -4,9 +4,12 @@ import type {
   AppUser,
   AuthResponse,
   Bot,
+  BotApiKey,
   BotDocument,
   BotDocumentContent,
   ChatResponse,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
   CreateBotRequest,
   CreateWorkspaceRequest,
   SignupRequest,
@@ -421,6 +424,60 @@ export async function uploadBotDocumentRequest(
   }
 
   return parseApiResponse<BotDocument>(response)
+}
+
+export async function fetchBotApiKeysRequest(
+  accessToken: string,
+  botId: string,
+): Promise<BotApiKey[]> {
+  const response = await fetch(`${getApiBaseUrl()}/bots/${botId}/api-keys`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<BotApiKey[]>(response)
+}
+
+export async function createBotApiKeyRequest(
+  accessToken: string,
+  botId: string,
+  data: CreateApiKeyRequest,
+): Promise<CreateApiKeyResponse> {
+  const response = await fetch(`${getApiBaseUrl()}/bots/${botId}/api-keys`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<CreateApiKeyResponse>(response)
+}
+
+export async function deleteBotApiKeyRequest(
+  accessToken: string,
+  botId: string,
+  apiKeyId: string,
+): Promise<void> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/bots/${botId}/api-keys/${apiKeyId}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  )
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
 }
 
 export async function createWorkspaceRequest(

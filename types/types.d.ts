@@ -112,6 +112,24 @@ export type BotDocumentContent = {
   content: string
 }
 
+export type ApiKeyStatus = "ACTIVE" | "REVOKED"
+
+export type BotApiKey = {
+  id: string
+  name: string
+  lastUsedAt?: string
+  revokedAt?: string
+  status: ApiKeyStatus
+}
+
+export type CreateApiKeyRequest = {
+  name: string
+}
+
+export type CreateApiKeyResponse = {
+  apiKey: string
+}
+
 export type ChatResponse = {
   response: string
   conversationId?: string

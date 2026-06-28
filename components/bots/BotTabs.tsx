@@ -4,6 +4,7 @@ import type { CreateBotFormData } from "@/components/bots/create-bot/types"
 import CreateBotChatPreview from "@/components/bots/create-bot/CreateBotChatPreview"
 import BotDetailsTab from "@/components/bots/BotDetailsTab"
 import BotDocumentsTab from "@/components/bots/BotDocumentsTab"
+import BotApiKeysTab from "@/components/bots/BotApiKeysTab"
 import type { BotFormData } from "@/components/bots/bot-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -54,8 +55,8 @@ const BotTabs = ({
           <TabsTrigger value="documents" className="w-fit px-8">
             Documents
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="w-fit px-8">
-            Analytics
+          <TabsTrigger value="api-keys" className="w-fit px-8">
+            API Keys
           </TabsTrigger>
         </TabsList>
         <TabsContent
@@ -80,9 +81,11 @@ const BotTabs = ({
           <BotDocumentsTab botId={botId} />
         </TabsContent>
         <TabsContent
-          value="analytics"
-          className="min-h-0 flex-1 overflow-y-auto"
-        />
+          value="api-keys"
+          className="min-h-0 flex-1 overflow-y-auto scrollbar-none"
+        >
+          <BotApiKeysTab botId={botId} />
+        </TabsContent>
       </Tabs>
 
       <CreateBotChatPreview
