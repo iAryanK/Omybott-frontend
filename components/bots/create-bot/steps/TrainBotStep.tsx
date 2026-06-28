@@ -30,44 +30,15 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { uploadBotDocument } from "@/lib/actions/documents"
 import { formatApiError } from "@/lib/api"
-
-const ACCEPTED_FILE_TYPES = ".pdf,.txt,.md,.markdown"
-const ACCEPTED_MIME_TYPES = [
-  "application/pdf",
-  "text/plain",
-  "text/markdown",
-  "text/x-markdown",
-]
+import {
+  ACCEPTED_FILE_TYPES,
+  formatFileSize,
+  isAcceptedFile,
+} from "@/components/bots/document-upload"
 
 type TrainBotStepProps = {
   botId: string
   onComplete: () => void
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) {
-    return `${bytes} B`
-  }
-
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`
-  }
-
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function isAcceptedFile(file: File) {
-  if (ACCEPTED_MIME_TYPES.includes(file.type)) {
-    return true
-  }
-
-  const lowerName = file.name.toLowerCase()
-  return (
-    lowerName.endsWith(".pdf") ||
-    lowerName.endsWith(".txt") ||
-    lowerName.endsWith(".md") ||
-    lowerName.endsWith(".markdown")
-  )
 }
 
 const TrainBotStep = ({ botId, onComplete }: TrainBotStepProps) => {

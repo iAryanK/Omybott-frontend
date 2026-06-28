@@ -5,6 +5,7 @@ import type {
   AuthResponse,
   Bot,
   BotDocument,
+  BotDocumentContent,
   ChatResponse,
   CreateBotRequest,
   CreateWorkspaceRequest,
@@ -324,6 +325,62 @@ export async function sendPlaygroundChatRequest(
   }
 
   return parseApiResponse<ChatResponse>(response)
+}
+
+export async function fetchBotDocumentsRequest(
+  accessToken: string,
+  botId: string,
+  succeeded = true,
+): Promise<BotDocument[]> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/bots/${botId}/documents?succeeded=${succeeded}`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  )
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<BotDocument[]>(response)
+}
+
+export async function fetchBotDocumentRequest(
+  accessToken: string,
+  botId: string,
+  documentId: string,
+): Promise<BotDocumentContent> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/bots/${botId}/documents/${documentId}`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  )
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<BotDocumentContent>(response)
+}
+
+export async function deleteBotDocumentRequest(
+  accessToken: string,
+  botId: string,
+  documentId: string,
+): Promise<void> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/bots/${botId}/documents/${documentId}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  )
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
 }
 
 export async function uploadBotDocumentRequest(

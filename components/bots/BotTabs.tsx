@@ -3,9 +3,9 @@
 import type { CreateBotFormData } from "@/components/bots/create-bot/types"
 import CreateBotChatPreview from "@/components/bots/create-bot/CreateBotChatPreview"
 import BotDetailsTab from "@/components/bots/BotDetailsTab"
+import BotDocumentsTab from "@/components/bots/BotDocumentsTab"
 import type { BotFormData } from "@/components/bots/bot-form"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "../ui/separator"
 
 type BotTabsProps = {
   botId: string
@@ -42,7 +42,7 @@ const BotTabs = ({
   onSave,
 }: BotTabsProps) => {
   return (
-    <div className="mt-4 grid min-h-0 flex-1 gap-10 lg:grid-cols-5">
+    <div className="mt-4 grid min-h-0 flex-1 gap-10 lg:grid-cols-5 px-1">
       <Tabs
         defaultValue="details"
         className="flex min-h-0 flex-col overflow-hidden lg:col-span-3"
@@ -75,8 +75,10 @@ const BotTabs = ({
         </TabsContent>
         <TabsContent
           value="documents"
-          className="min-h-0 flex-1 overflow-y-auto"
-        />
+          className="min-h-0 flex-1 overflow-y-auto scrollbar-none"
+        >
+          <BotDocumentsTab botId={botId} />
+        </TabsContent>
         <TabsContent
           value="analytics"
           className="min-h-0 flex-1 overflow-y-auto"

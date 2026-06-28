@@ -108,6 +108,10 @@ export type BotDocument = {
   failureReason?: string
 }
 
+export type BotDocumentContent = {
+  content: string
+}
+
 export type ChatResponse = {
   response: string
   conversationId?: string

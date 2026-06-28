@@ -32,7 +32,7 @@ const BotDetails = ({ bot }: BotDetailsProps) => {
               <h1 className="truncate font-heading text-lg font-medium text-foreground">
                 {bot.name}
               </h1>
-              <Badge variant={bot.status === "ACTIVE" ? "default" : "secondary"}>
+              <Badge variant={bot.status === "ACTIVE" ? "default" : "destructive"}>
                 BOT
               </Badge>
             </div>

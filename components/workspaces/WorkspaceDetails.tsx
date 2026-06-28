@@ -36,7 +36,7 @@ const WorkspaceDetails = ({ workspace }: WorkspaceDetailsProps) => {
               <h1 className="truncate font-heading text-lg font-medium text-foreground">
                 {workspace.name}
               </h1>
-              <Badge variant={workspace.active ? "default" : "secondary"}>
+              <Badge variant={workspace.active ? "default" : "destructive"}>
                 WORKSPACE
               </Badge>
             </div>
