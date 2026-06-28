@@ -73,6 +73,7 @@ const BotPageClient = ({ bot: initialBot }: BotPageClientProps) => {
         <BotDetails bot={displayBot} />
       </div>
       <BotTabs
+        botId={bot.id}
         formData={formData}
         isEditing={isEditing}
         isSaving={isSaving}

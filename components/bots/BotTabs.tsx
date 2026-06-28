@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "../ui/separator"
 
 type BotTabsProps = {
+  botId: string
   formData: BotFormData
   isEditing: boolean
   isSaving: boolean
@@ -30,6 +31,7 @@ function toPreviewData(formData: BotFormData): CreateBotFormData {
 }
 
 const BotTabs = ({
+  botId,
   formData,
   isEditing,
   isSaving,
@@ -81,7 +83,11 @@ const BotTabs = ({
         />
       </Tabs>
 
-      <CreateBotChatPreview formData={toPreviewData(formData)} />
+      <CreateBotChatPreview
+        formData={toPreviewData(formData)}
+        botId={botId}
+        interactive
+      />
     </div>
   )
 }

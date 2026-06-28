@@ -4,6 +4,8 @@ import type {
   AppUser,
   AuthResponse,
   Bot,
+  BotDocument,
+  ChatResponse,
   CreateBotRequest,
   CreateWorkspaceRequest,
   SignupRequest,
@@ -298,6 +300,70 @@ export async function patchBotRequest(
   }
 
   return parseApiResponse<Bot>(response)
+}
+
+export async function sendPlaygroundChatRequest(
+  accessToken: string,
+  botId: string,
+  message: string,
+): Promise<ChatResponse> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/bots/${botId}/playground/chat`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    },
+  )
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<ChatResponse>(response)
+}
+
+export async function uploadBotDocumentRequest(
+  accessToken: string,
+  botId: string,
+  file: File | Blob,
+  filename?: string,
+): Promise<BotDocument> {
+  const resolvedFilename =
+    filename ?? (file instanceof File ? file.name : "document")
+
+  const formData = new FormData()
+  formData.append("file", file, resolvedFilename)
+  formData.append(
+    "metadata",
+    new Blob(
+      [
+        JSON.stringify({
+          fileName: resolvedFilename,
+          mimeType: file.type || undefined,
+          fileSizeBytes: file.size,
+        }),
+      ],
+      { type: "application/json" },
+    ),
+  )
+
+  const response = await fetch(`${getApiBaseUrl()}/bots/${botId}/documents`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
+  })
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<BotDocument>(response)
 }
 
 export async function createWorkspaceRequest(

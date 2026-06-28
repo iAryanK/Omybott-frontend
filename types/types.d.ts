@@ -93,6 +93,26 @@ export type UpdateBotRequest = {
   status: BotStatus
 }
 
+export type DocumentType = "PDF" | "DOCX" | "TXT" | "MARKDOWN" | "URL"
+
+export type DocumentStatus = "UPLOADED" | "PROCESSING" | "READY" | "FAILED"
+
+export type BotDocument = {
+  id: string
+  fileName: string
+  fileType: DocumentType
+  mimeType: string
+  fileSizeBytes: number
+  status: DocumentStatus
+  chunkCount?: number
+  failureReason?: string
+}
+
+export type ChatResponse = {
+  response: string
+  conversationId?: string
+}
+
 declare module "next-auth" {
   interface Session {
     user: AppUser

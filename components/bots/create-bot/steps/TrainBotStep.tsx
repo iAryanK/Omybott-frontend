@@ -1,6 +1,12 @@
 "use client"
 
-import { BookOpenIcon, UploadIcon } from "lucide-react"
+import { useRef, useState } from "react"
+import {
+  BookOpenIcon,
+  FileTextIcon,
+  Trash2Icon,
+  UploadIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,12 +17,133 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentGroup,
+  AttachmentMedia,
+  AttachmentTitle,
+} from "@/components/ui/attachment"
+import { Spinner } from "@/components/ui/spinner"
+import { uploadBotDocument } from "@/lib/actions/documents"
+import { formatApiError } from "@/lib/api"
+
+const ACCEPTED_FILE_TYPES = ".pdf,.txt,.md,.markdown"
+const ACCEPTED_MIME_TYPES = [
+  "application/pdf",
+  "text/plain",
+  "text/markdown",
+  "text/x-markdown",
+]
 
 type TrainBotStepProps = {
+  botId: string
   onComplete: () => void
 }
 
-const TrainBotStep = ({ onComplete }: TrainBotStepProps) => {
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) {
+    return `${bytes} B`
+  }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`
+  }
+
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function isAcceptedFile(file: File) {
+  if (ACCEPTED_MIME_TYPES.includes(file.type)) {
+    return true
+  }
+
+  const lowerName = file.name.toLowerCase()
+  return (
+    lowerName.endsWith(".pdf") ||
+    lowerName.endsWith(".txt") ||
+    lowerName.endsWith(".md") ||
+    lowerName.endsWith(".markdown")
+  )
+}
+
+const TrainBotStep = ({ botId, onComplete }: TrainBotStepProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleFileSelect = (selectedFiles: FileList | null) => {
+    if (!selectedFiles?.length) {
+      return
+    }
+
+    const nextFiles = Array.from(selectedFiles)
+    const invalidFiles = nextFiles.filter((file) => !isAcceptedFile(file))
+
+    if (invalidFiles.length > 0) {
+      setError("Only PDF, TXT, and Markdown files are supported.")
+      return
+    }
+
+    setError(null)
+    setFiles((current) => {
+      const existingNames = new Set(current.map((file) => file.name))
+      const uniqueFiles = nextFiles.filter((file) => !existingNames.has(file.name))
+      return [...current, ...uniqueFiles]
+    })
+  }
+
+  const handleRemoveFile = (index: number) => {
+    setFiles((current) => current.filter((_, fileIndex) => fileIndex !== index))
+  }
+
+  const handleSubmit = async () => {
+    setError(null)
+
+    if (files.length === 0) {
+      onComplete()
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append("file", file)
+
+        const result = await uploadBotDocument(botId, formData)
+
+        if (!result.success) {
+          setError(`${file.name}: ${formatApiError(result.error)}`)
+          return
+        }
+
+        if (result.data.status === "FAILED") {
+          setError(
+            result.data.failureReason ??
+              `${file.name} failed to process. Please try again.`,
+          )
+          return
+        }
+      }
+
+      onComplete()
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to upload documents. Please try again.",
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="mb-6">
@@ -26,28 +153,98 @@ const TrainBotStep = ({ onComplete }: TrainBotStepProps) => {
         </p>
       </div>
 
-      <Empty className="min-h-0 flex-1 border border-dashed">
-        <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <BookOpenIcon />
-          </EmptyMedia>
-          <EmptyTitle>No training data yet</EmptyTitle>
-          <EmptyDescription>
-            Add PDFs, URLs, or text snippets so your bot can answer questions
-            accurately.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button type="button" variant="outline" disabled>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept={ACCEPTED_FILE_TYPES}
+        multiple
+        className="hidden"
+        onChange={(event) => {
+          handleFileSelect(event.target.files)
+          event.target.value = ""
+        }}
+      />
+
+      {files.length === 0 ? (
+        <Empty className="min-h-0 flex-1 border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <BookOpenIcon />
+            </EmptyMedia>
+            <EmptyTitle>No training data yet</EmptyTitle>
+            <EmptyDescription>
+              Add PDF, TXT, or Markdown files so your bot can answer questions
+              accurately.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSubmitting}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <UploadIcon data-icon="inline-start" />
+              Upload sources
+            </Button>
+          </EmptyContent>
+        </Empty>
+      ) : (
+        <div className="min-h-0 flex-1 space-y-4">
+          <AttachmentGroup className="flex-wrap">
+            {files.map((file, index) => (
+              <Attachment key={`${file.name}-${index}`} size="sm">
+                <AttachmentMedia>
+                  <FileTextIcon />
+                </AttachmentMedia>
+                <AttachmentContent>
+                  <AttachmentTitle>{file.name}</AttachmentTitle>
+                  <AttachmentDescription>
+                    {formatFileSize(file.size)}
+                  </AttachmentDescription>
+                </AttachmentContent>
+                <AttachmentActions>
+                  <AttachmentAction
+                    aria-label={`Remove ${file.name}`}
+                    disabled={isSubmitting}
+                    onClick={() => handleRemoveFile(index)}
+                  >
+                    <Trash2Icon />
+                  </AttachmentAction>
+                </AttachmentActions>
+              </Attachment>
+            ))}
+          </AttachmentGroup>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isSubmitting}
+            onClick={() => fileInputRef.current?.click()}
+          >
             <UploadIcon data-icon="inline-start" />
-            Upload sources
+            Add more files
           </Button>
-        </EmptyContent>
-      </Empty>
+        </div>
+      )}
+
+      {error ? (
+        <p className="mt-4 text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="mt-6 flex justify-end pt-4">
-        <Button type="button" onClick={onComplete}>
-          Continue to playground
+        <Button type="button" disabled={isSubmitting} onClick={handleSubmit}>
+          {isSubmitting ? (
+            <>
+              <Spinner />
+              Uploading...
+            </>
+          ) : (
+            "Continue to playground"
+          )}
         </Button>
       </div>
     </div>

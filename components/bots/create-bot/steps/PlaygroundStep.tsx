@@ -27,7 +27,7 @@ const PlaygroundStep = ({ workspaceId, botName }: PlaygroundStepProps) => {
             {botName.trim() ? `${botName} is ready!` : "Your bot is ready!"}
           </p>
           <p className="text-xs text-muted-foreground">
-            Use the chat preview on the right to try a sample conversation.
+            Use the chat preview on the right to send messages to your bot.
           </p>
         </div>
       </div>

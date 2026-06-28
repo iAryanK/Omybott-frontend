@@ -76,8 +76,11 @@ const CreateBotFlow = ({ workspaceId }: CreateBotFlowProps) => {
             />
           ) : null}
 
-          {currentStep === 2 ? (
-            <TrainBotStep onComplete={() => setCurrentStep(3)} />
+          {currentStep === 2 && createdBot ? (
+            <TrainBotStep
+              botId={createdBot.id}
+              onComplete={() => setCurrentStep(3)}
+            />
           ) : null}
 
           {currentStep === 3 ? (
@@ -90,7 +93,8 @@ const CreateBotFlow = ({ workspaceId }: CreateBotFlowProps) => {
 
         <CreateBotChatPreview
           formData={formData}
-          showSampleConversation={currentStep >= 3}
+          botId={createdBot?.id}
+          interactive={currentStep >= 3 && Boolean(createdBot?.id)}
         />
       </div>
     </div>
