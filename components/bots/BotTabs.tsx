@@ -84,7 +84,7 @@ const BotTabs = ({
           value="api-keys"
           className="min-h-0 flex-1 overflow-y-auto scrollbar-none"
         >
-          <BotApiKeysTab botId={botId} />
+          <BotApiKeysTab botId={botId} botConfig={formData} />
         </TabsContent>
       </Tabs>
 

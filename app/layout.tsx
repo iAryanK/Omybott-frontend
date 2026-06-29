@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { OmybottChatWidget } from "@/components/shared/OmybottChatWidget";
 
 const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -60,6 +61,8 @@ export default function RootLayout({
           <TooltipProvider>{children}</TooltipProvider>
           </AuthSessionProvider>
         </ThemeProvider>
+
+        <OmybottChatWidget />
       </body>
     </html>
   );

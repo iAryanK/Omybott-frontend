@@ -1,7 +1,10 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
-import { CopyIcon, KeyIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { CodeIcon, CopyIcon, KeyIcon, PlusIcon, Trash2Icon } from "lucide-react"
+
+import BotEmbedCodePanel from "@/components/bots/BotEmbedCodePanel"
+import type { BotFormData } from "@/components/bots/bot-form"
 
 import {
   AlertDialog,
@@ -48,10 +51,13 @@ import {
   getBotApiKeys,
 } from "@/lib/actions/api-keys"
 import { formatApiError } from "@/lib/api"
+import { getClientEmbedUrls, type EmbedBotConfig } from "@/lib/embed-code"
 import type { ApiKeyStatus, BotApiKey } from "@/types/types"
+import { formatDateTime } from "@/utils/date"
 
 type BotApiKeysTabProps = {
   botId: string
+  botConfig: BotFormData
 }
 
 function statusVariant(status: ApiKeyStatus) {
@@ -69,15 +75,7 @@ function formatStatus(status: ApiKeyStatus) {
   return status.charAt(0) + status.slice(1).toLowerCase()
 }
 
-function formatDate(value?: string) {
-  if (!value) {
-    return "Never"
-  }
-
-  return new Date(value).toLocaleString()
-}
-
-const BotApiKeysTab = ({ botId }: BotApiKeysTabProps) => {
+const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
   const [apiKeys, setApiKeys] = useState<BotApiKey[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -88,9 +86,31 @@ const BotApiKeysTab = ({ botId }: BotApiKeysTabProps) => {
   const [revealedKey, setRevealedKey] = useState<string | null>(null)
   const [revealedKeyDialogOpen, setRevealedKeyDialogOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [embedDialogOpen, setEmbedDialogOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<BotApiKey | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const { apiBaseUrl, widgetBaseUrl } = getClientEmbedUrls()
+
+  const buildEmbedConfig = useCallback(
+    (apiKey: string): EmbedBotConfig => ({
+      apiKey,
+      apiBaseUrl,
+      widgetBaseUrl,
+      botName: botConfig.name.trim() || "Your Bot",
+      botDescription:
+        botConfig.description.trim() || "How can I help you today?",
+      primaryColor: botConfig.primaryColor,
+      welcomeMessage: botConfig.welcomeMessage.trim(),
+    }),
+    [apiBaseUrl, botConfig, widgetBaseUrl],
+  )
+
+  const placeholderEmbedConfig = useMemo(
+    () => buildEmbedConfig("YOUR_API_KEY"),
+    [buildEmbedConfig],
+  )
 
   const loadApiKeys = useCallback(async () => {
     setIsLoading(true)
@@ -261,7 +281,7 @@ const BotApiKeysTab = ({ botId }: BotApiKeysTabProps) => {
                 <TableHead>Name</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Last used</TableHead>
-                <TableHead className="w-16 text-right">Actions</TableHead>
+                <TableHead className="w-28 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -273,20 +293,31 @@ const BotApiKeysTab = ({ botId }: BotApiKeysTabProps) => {
                       {formatStatus(apiKey.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{formatDate(apiKey.lastUsedAt)}</TableCell>
+                  <TableCell>{formatDateTime(apiKey.lastUsedAt, "Never")}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label={`Delete ${apiKey.name}`}
-                      onClick={() => {
-                        setDeleteError(null)
-                        setDeleteTarget(apiKey)
-                      }}
-                    >
-                      <Trash2Icon />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`View embed code for ${apiKey.name}`}
+                        onClick={() => setEmbedDialogOpen(true)}
+                      >
+                        <CodeIcon />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Delete ${apiKey.name}`}
+                        onClick={() => {
+                          setDeleteError(null)
+                          setDeleteTarget(apiKey)
+                        }}
+                      >
+                        <Trash2Icon />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -366,37 +397,72 @@ const BotApiKeysTab = ({ botId }: BotApiKeysTabProps) => {
         }}
       >
         <DialogContent
-          className="sm:max-w-lg"
+          className="sm:max-w-2xl"
           onInteractOutside={(event) => event.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle>Copy your API key</DialogTitle>
+            <DialogTitle>API key created</DialogTitle>
             <DialogDescription>
-              This is the only time you will see this key. Copy it now and store
-              it securely.
+              Copy your API key now — you will not see it again. Then add the
+              embed code to your website.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="rounded-lg border bg-muted/30 p-3">
-            <code className="block wrap-break-word font-mono text-xs">
-              {revealedKey}
-            </code>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">API key</p>
+              <div className="rounded-lg border bg-muted/30 p-3">
+                <code className="block wrap-break-word font-mono text-xs">
+                  {revealedKey}
+                </code>
+              </div>
+              <div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void handleCopyKey()}
+                >
+                  <CopyIcon data-icon="inline-start" />
+                  {copied ? "Copied" : "Copy key"}
+                </Button>
+              </div>
+            </div>
+
+            {revealedKey ? (
+              <BotEmbedCodePanel config={buildEmbedConfig(revealedKey)} />
+            ) : null}
           </div>
 
           <DialogFooter>
             <Button
               type="button"
-              variant="outline"
-              onClick={() => void handleCopyKey()}
-            >
-              <CopyIcon data-icon="inline-start" />
-              {copied ? "Copied" : "Copy key"}
-            </Button>
-            <Button
-              type="button"
               onClick={() => setRevealedKeyDialogOpen(false)}
             >
               Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={embedDialogOpen} onOpenChange={setEmbedDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Embed code</DialogTitle>
+            <DialogDescription>
+              Add this chat widget to your website. Use the API key you saved
+              when you created it.
+            </DialogDescription>
+          </DialogHeader>
+
+          <BotEmbedCodePanel
+            config={placeholderEmbedConfig}
+            apiKeyPlaceholder
+          />
+
+          <DialogFooter>
+            <Button type="button" onClick={() => setEmbedDialogOpen(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
