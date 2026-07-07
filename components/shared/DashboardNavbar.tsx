@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { LogOutIcon, UserIcon } from "lucide-react"
+import { LogOutIcon, SparklesIcon, UserIcon } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 
+import { AgentModeSheet } from "@/components/shared/AgentModeSheet"
 import Logo from "@/components/shared/Logo"
 import { ModeToggle } from "@/components/shared/ThemeToggle"
 import {
@@ -31,6 +32,7 @@ export function DashboardNavbar() {
   const { data: session } = useSession()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
+  const [agentModeOpen, setAgentModeOpen] = useState(false)
 
   const handleLogout = () => {
     void signOut({ callbackUrl: "/login" })
@@ -45,6 +47,14 @@ export function DashboardNavbar() {
           </Link>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              className="bg-transparent hover:bg-transparent hover:underline underline-offset-8"
+              onClick={() => setAgentModeOpen(true)}
+            >
+              <SparklesIcon />
+              Agent mode
+            </Button>
             <ModeToggle />
             <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger asChild>
@@ -85,6 +95,8 @@ export function DashboardNavbar() {
           </div>
         </div>
       </header>
+
+      <AgentModeSheet open={agentModeOpen} onOpenChange={setAgentModeOpen} />
 
       <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
         <AlertDialogContent>

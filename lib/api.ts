@@ -330,6 +330,26 @@ export async function sendPlaygroundChatRequest(
   return parseApiResponse<ChatResponse>(response)
 }
 
+export async function sendAgentChatRequest(
+  accessToken: string,
+  message: string,
+): Promise<ChatResponse> {
+  const response = await fetch(`${getApiBaseUrl()}/agent/chat`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(message),
+  })
+
+  if (!response.ok) {
+    throw new ApiRequestError(await parseApiError(response))
+  }
+
+  return parseApiResponse<ChatResponse>(response)
+}
+
 export async function fetchBotDocumentsRequest(
   accessToken: string,
   botId: string,

@@ -65,7 +65,7 @@ const BotEmbedCodePanel = ({
         <div className="flex items-center justify-between gap-2">
           <TabsList>
             {FORMATS.map((item) => (
-              <TabsTrigger key={item.value} value={item.value}>
+              <TabsTrigger key={item.value} value={item.value} className="px-5">
                 {item.label}
               </TabsTrigger>
             ))}
