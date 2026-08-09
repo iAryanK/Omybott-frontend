@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 
 import { formatApiError } from "@/lib/api"
-import { sendAgentChat } from "@/lib/actions/agent"
+import { sendAgentChat } from "@/lib/api-client"
 import { MarkdownMessage } from "@/components/shared/MarkdownMessage"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import { Button } from "@/components/ui/button"

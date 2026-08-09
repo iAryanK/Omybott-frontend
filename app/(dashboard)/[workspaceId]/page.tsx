@@ -1,6 +1,6 @@
 import WorkspaceBots from "@/components/workspaces/WorkspaceBots"
 import WorkspaceDetails from "@/components/workspaces/WorkspaceDetails"
-import { getWorkspace, getWorkspaceBots } from "@/lib/actions/workspaces"
+import { getWorkspace, getWorkspaceBots } from "@/lib/server-api"
 
 type WorkspacePageProps = {
   params: Promise<{

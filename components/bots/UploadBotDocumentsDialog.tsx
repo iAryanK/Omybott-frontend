@@ -28,7 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
-import { uploadBotDocument } from "@/lib/actions/documents"
+import { uploadBotDocument } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 
 type UploadBotDocumentsDialogProps = {

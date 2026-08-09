@@ -49,7 +49,7 @@ import {
   createBotApiKey,
   deleteBotApiKey,
   getBotApiKeys,
-} from "@/lib/actions/api-keys"
+} from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 import { getClientEmbedUrls, type EmbedBotConfig } from "@/lib/embed-code"
 import type { ApiKeyStatus, BotApiKey } from "@/types/types"

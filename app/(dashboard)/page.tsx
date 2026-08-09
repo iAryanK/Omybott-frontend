@@ -1,4 +1,4 @@
-import { getWorkspaces } from "@/lib/actions/workspaces"
+import { getWorkspaces } from "@/lib/server-api"
 import CreateWorkspaceDialog from "@/components/workspaces/CreateWorkspaceDialog"
 import Link from "next/link"
 import { PlusIcon } from "lucide-react"

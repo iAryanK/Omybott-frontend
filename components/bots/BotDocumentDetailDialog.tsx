@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Spinner } from "@/components/ui/spinner"
-import { deleteBotDocument, getBotDocument } from "@/lib/actions/documents"
+import { deleteBotDocument, getBotDocument } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 import type { BotDocument, DocumentStatus } from "@/types/types"
 

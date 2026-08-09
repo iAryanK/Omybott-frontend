@@ -3,9 +3,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { signIn } from "next-auth/react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -31,7 +31,6 @@ type LoginFormValues = {
 
 const LoginForm = () => {
   const router = useRouter()
-  const [apiError, setApiError] = useState<string | null>(null)
 
   const {
     register,
@@ -40,8 +39,6 @@ const LoginForm = () => {
   } = useForm<LoginFormValues>()
 
   const onSubmit = async (values: LoginFormValues) => {
-    setApiError(null)
-
     try {
       const result = await signIn("credentials", {
         email: values.email,
@@ -50,14 +47,16 @@ const LoginForm = () => {
       })
 
       if (result?.error) {
-        setApiError("Invalid email or password")
+        toast.error("Invalid email or password")
         return
       }
 
       router.push("/")
       router.refresh()
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : "Failed to sign in")
+      toast.error(
+        error instanceof Error ? error.message : "Failed to sign in",
+      )
     }
   }
 
@@ -108,8 +107,6 @@ const LoginForm = () => {
               <FieldError errors={[errors.password]} />
             </Field>
           </FieldGroup>
-
-          {apiError && <FieldError>{apiError}</FieldError>}
 
           <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
             {isSubmitting ? "Signing in..." : "Sign in"}

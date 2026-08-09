@@ -1,5 +1,5 @@
 import BotPageClient from "@/components/bots/BotPageClient"
-import { getBot } from "@/lib/actions/workspaces"
+import { getBot } from "@/lib/server-api"
 
 type BotPageProps = {
   params: Promise<{

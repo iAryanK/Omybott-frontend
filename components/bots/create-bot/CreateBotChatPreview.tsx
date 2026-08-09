@@ -69,7 +69,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { sendPlaygroundChat } from "@/lib/actions/chat"
+import { sendPlaygroundChat } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 import { getInitial } from "@/utils/util"
 

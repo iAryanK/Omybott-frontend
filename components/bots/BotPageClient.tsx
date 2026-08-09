@@ -10,7 +10,7 @@ import {
   formDataToUpdateRequest,
   type BotFormData,
 } from "@/components/bots/bot-form"
-import { updateBot } from "@/lib/actions/workspaces"
+import { updateBot } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 import type { Bot } from "@/types/types"
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-import { createBot } from "@/lib/actions/workspaces"
+import { createBot } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 import type { Bot } from "@/types/types"
 

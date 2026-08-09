@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation"
 import { useState, type ReactNode } from "react"
-import { createWorkspace } from "@/lib/actions/workspaces"
+import { toast } from "sonner"
+import { createWorkspace } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,7 +18,6 @@ import {
 import {
   Field,
   FieldDescription,
-  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
@@ -28,25 +28,22 @@ const CreateWorkspaceDialog = ({ children }: { children: ReactNode }) => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [name, setName] = useState("")
-  const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const slug = generateWorkspaceSlug(name)
 
   const resetForm = () => {
     setName("")
-    setError(null)
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setError(null)
     setIsSubmitting(true)
 
     try {
       const result = await createWorkspace({ name: name.trim(), active: true })
 
       if (!result.success) {
-        setError(formatApiError(result.error))
+        toast.error(formatApiError(result.error))
         return
       }
 
@@ -54,7 +51,9 @@ const CreateWorkspaceDialog = ({ children }: { children: ReactNode }) => {
       resetForm()
       router.push(`/${result.data.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create workspace")
+      toast.error(
+        err instanceof Error ? err.message : "Failed to create workspace",
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -80,7 +79,7 @@ const CreateWorkspaceDialog = ({ children }: { children: ReactNode }) => {
             </DialogDescription>
           </DialogHeader>
           <FieldGroup className="py-4">
-            <Field data-invalid={!!error}>
+            <Field>
               <FieldLabel htmlFor="workspace-name">Name</FieldLabel>
               <Input
                 id="workspace-name"
@@ -96,7 +95,6 @@ const CreateWorkspaceDialog = ({ children }: { children: ReactNode }) => {
                 </FieldDescription>
               ) : null}
             </Field>
-            {error ? <FieldError>{error}</FieldError> : null}
           </FieldGroup>
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting || !name.trim()}>

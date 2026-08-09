@@ -3,9 +3,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { signIn } from "next-auth/react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -33,7 +33,6 @@ type SignupFormValues = {
 
 const SignupForm = () => {
   const router = useRouter()
-  const [apiError, setApiError] = useState<string | null>(null)
 
   const {
     register,
@@ -42,8 +41,6 @@ const SignupForm = () => {
   } = useForm<SignupFormValues>()
 
   const onSubmit = async (values: SignupFormValues) => {
-    setApiError(null)
-
     try {
       await registerUser(values)
 
@@ -54,14 +51,16 @@ const SignupForm = () => {
       })
 
       if (result?.error) {
-        setApiError("Account created but sign in failed. Please log in.")
+        toast.error("Account created but sign in failed. Please log in.")
         return
       }
 
       router.push("/")
       router.refresh()
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : "Failed to sign up")
+      toast.error(
+        error instanceof Error ? error.message : "Failed to sign up",
+      )
     }
   }
 
@@ -130,8 +129,6 @@ const SignupForm = () => {
               <FieldError errors={[errors.password]} />
             </Field>
           </FieldGroup>
-
-          {apiError && <FieldError>{apiError}</FieldError>}
 
           <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
             {isSubmitting ? "Signing up..." : "Sign up"}

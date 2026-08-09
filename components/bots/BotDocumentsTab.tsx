@@ -5,7 +5,7 @@ import { FileTextIcon, PlusIcon } from "lucide-react"
 
 import UploadBotDocumentsDialog from "@/components/bots/UploadBotDocumentsDialog"
 import BotDocumentDetailDialog from "@/components/bots/BotDocumentDetailDialog"
-import { getBotDocuments } from "@/lib/actions/documents"
+import { getBotDocuments } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 import type { BotDocument, DocumentStatus } from "@/types/types"
 import { Badge } from "@/components/ui/badge"

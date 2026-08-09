@@ -28,7 +28,7 @@ import {
   AttachmentTitle,
 } from "@/components/ui/attachment"
 import { Spinner } from "@/components/ui/spinner"
-import { uploadBotDocument } from "@/lib/actions/documents"
+import { uploadBotDocument } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
 import {
   ACCEPTED_FILE_TYPES,
