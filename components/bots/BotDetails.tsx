@@ -32,7 +32,7 @@ const BotDetails = ({ bot }: BotDetailsProps) => {
           </div>
         </div>
 
-        <div className="flex flex-col flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:justify-end">
+        <div className="flex flex-col flex-wrap sm:items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:justify-end">
           <div className="flex items-center gap-2">
             <span className="font-medium text-foreground/70">Created</span>
             <span>{formatDateTime(bot.createdAt)}</span>

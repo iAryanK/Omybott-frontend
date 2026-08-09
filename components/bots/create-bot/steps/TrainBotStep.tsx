@@ -7,6 +7,7 @@ import {
   Trash2Icon,
   UploadIcon,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -45,7 +46,6 @@ const TrainBotStep = ({ botId, onComplete }: TrainBotStepProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [files, setFiles] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const handleFileSelect = (selectedFiles: FileList | null) => {
     if (!selectedFiles?.length) {
@@ -56,11 +56,10 @@ const TrainBotStep = ({ botId, onComplete }: TrainBotStepProps) => {
     const invalidFiles = nextFiles.filter((file) => !isAcceptedFile(file))
 
     if (invalidFiles.length > 0) {
-      setError("Only PDF, TXT, and Markdown files are supported.")
+      toast.error("Only PDF, TXT, and Markdown files are supported.")
       return
     }
 
-    setError(null)
     setFiles((current) => {
       const existingNames = new Set(current.map((file) => file.name))
       const uniqueFiles = nextFiles.filter((file) => !existingNames.has(file.name))
@@ -73,8 +72,6 @@ const TrainBotStep = ({ botId, onComplete }: TrainBotStepProps) => {
   }
 
   const handleSubmit = async () => {
-    setError(null)
-
     if (files.length === 0) {
       onComplete()
       return
@@ -90,12 +87,12 @@ const TrainBotStep = ({ botId, onComplete }: TrainBotStepProps) => {
         const result = await uploadBotDocument(botId, formData)
 
         if (!result.success) {
-          setError(`${file.name}: ${formatApiError(result.error)}`)
+          toast.error(`${file.name}: ${formatApiError(result.error)}`)
           return
         }
 
         if (result.data.status === "FAILED") {
-          setError(
+          toast.error(
             result.data.failureReason ??
               `${file.name} failed to process. Please try again.`,
           )
@@ -105,7 +102,7 @@ const TrainBotStep = ({ botId, onComplete }: TrainBotStepProps) => {
 
       onComplete()
     } catch (submitError) {
-      setError(
+      toast.error(
         submitError instanceof Error
           ? submitError.message
           : "Failed to upload documents. Please try again.",
@@ -199,12 +196,6 @@ const TrainBotStep = ({ botId, onComplete }: TrainBotStepProps) => {
           </Button>
         </div>
       )}
-
-      {error ? (
-        <p className="mt-4 text-sm text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
 
       <div className="mt-6 flex justify-end pt-4">
         <Button type="button" disabled={isSubmitting} onClick={handleSubmit}>

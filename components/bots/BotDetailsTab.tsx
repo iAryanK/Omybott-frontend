@@ -8,7 +8,7 @@ import {
   type BotFormData,
 } from "@/components/bots/bot-form"
 import { Button } from "@/components/ui/button"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
   NativeSelect,
@@ -22,7 +22,6 @@ type BotDetailsTabProps = {
   formData: BotFormData
   isEditing: boolean
   isSaving: boolean
-  error: string | null
   onChange: (data: BotFormData) => void
   onEdit: () => void
   onCancel: () => void
@@ -33,7 +32,6 @@ const BotDetailsTab = ({
   formData,
   isEditing,
   isSaving,
-  error,
   onChange,
   onEdit,
   onCancel,
@@ -204,8 +202,6 @@ const BotDetailsTab = ({
           />
         </Field>
       </FieldGroup>
-
-      {error ? <FieldError className="mt-4">{error}</FieldError> : null}
     </div>
   )
 }

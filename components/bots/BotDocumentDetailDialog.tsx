@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Trash2Icon } from "lucide-react"
+import { toast } from "sonner"
 
 import { formatFileSize } from "@/components/bots/document-upload"
 import {
@@ -62,15 +63,12 @@ const BotDocumentDetailDialog = ({
 }: BotDocumentDetailDialogProps) => {
   const [content, setContent] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open || !document) {
       setContent(null)
-      setError(null)
       setIsLoading(false)
       return
     }
@@ -80,7 +78,6 @@ const BotDocumentDetailDialog = ({
 
     async function loadContent() {
       setIsLoading(true)
-      setError(null)
       setContent(null)
 
       const result = await getBotDocument(botId, documentId)
@@ -90,7 +87,8 @@ const BotDocumentDetailDialog = ({
       }
 
       if (!result.success) {
-        setError(formatApiError(result.error))
+        toast.error(formatApiError(result.error))
+        setContent(null)
       } else {
         setContent(result.data.content)
       }
@@ -110,14 +108,13 @@ const BotDocumentDetailDialog = ({
       return
     }
 
-    setDeleteError(null)
     setIsDeleting(true)
 
     try {
       const result = await deleteBotDocument(botId, document.id)
 
       if (!result.success) {
-        setDeleteError(formatApiError(result.error))
+        toast.error(formatApiError(result.error))
         return
       }
 
@@ -125,7 +122,7 @@ const BotDocumentDetailDialog = ({
       onOpenChange(false)
       onDeleted()
     } catch (deleteFailure) {
-      setDeleteError(
+      toast.error(
         deleteFailure instanceof Error
           ? deleteFailure.message
           : "Failed to delete document. Please try again.",
@@ -150,7 +147,6 @@ const BotDocumentDetailDialog = ({
                       {formatStatus(document.status)}
                     </Badge>
                   ) : null}
-
                 </DialogTitle>
                 {document ? (
                   <DialogDescription>
@@ -169,10 +165,6 @@ const BotDocumentDetailDialog = ({
               <div className="flex min-h-64 items-center justify-center">
                 <Spinner className="size-5" />
               </div>
-            ) : error ? (
-              <p className="text-sm text-destructive" role="alert">
-                {error}
-              </p>
             ) : (
               <ScrollArea className="h-[min(60vh,32rem)] bg-muted/20">
                 <pre className="wrap-break-word p-4 font-mono text-xs/relaxed whitespace-pre-wrap text-foreground">
@@ -194,10 +186,7 @@ const BotDocumentDetailDialog = ({
               type="button"
               variant="destructive"
               disabled={!document || isLoading}
-              onClick={() => {
-                setDeleteError(null)
-                setDeleteDialogOpen(true)
-              }}
+              onClick={() => setDeleteDialogOpen(true)}
             >
               <Trash2Icon data-icon="inline-start" />
               Delete document
@@ -218,11 +207,6 @@ const BotDocumentDetailDialog = ({
               and its indexed chunks from this bot.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {deleteError ? (
-            <p className="text-sm text-destructive" role="alert">
-              {deleteError}
-            </p>
-          ) : null}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction

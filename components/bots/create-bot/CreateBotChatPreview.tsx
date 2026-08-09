@@ -71,6 +71,7 @@ import {
 } from "@/components/ui/tooltip"
 import { sendPlaygroundChat } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
+import { toast } from "sonner"
 import { getInitial } from "@/utils/util"
 
 import type { CreateBotFormData } from "./types"
@@ -217,7 +218,6 @@ const CreateBotChatPreview = ({
   const [chatMessages, setChatMessages] = useState<PreviewMessage[]>([])
   const [inputValue, setInputValue] = useState("")
   const [isSending, setIsSending] = useState(false)
-  const [chatError, setChatError] = useState<string | null>(null)
 
   useEffect(() => {
     setSampleDismissed(false)
@@ -227,7 +227,6 @@ const CreateBotChatPreview = ({
     if (!interactive) {
       setChatMessages([])
       setInputValue("")
-      setChatError(null)
     }
   }, [interactive, botId])
 
@@ -263,7 +262,6 @@ const CreateBotChatPreview = ({
     if (interactive) {
       setChatMessages([])
       setInputValue("")
-      setChatError(null)
       return
     }
 
@@ -288,14 +286,13 @@ const CreateBotChatPreview = ({
 
     setChatMessages((current) => [...current, userMessage])
     setInputValue("")
-    setChatError(null)
     setIsSending(true)
 
     try {
       const result = await sendPlaygroundChat(botId, trimmedMessage)
 
       if (!result.success) {
-        setChatError(formatApiError(result.error))
+        toast.error(formatApiError(result.error))
         setChatMessages((current) =>
           current.filter((message) => message.id !== userMessage.id),
         )
@@ -312,7 +309,7 @@ const CreateBotChatPreview = ({
         },
       ])
     } catch (error) {
-      setChatError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to send message. Please try again.",
@@ -428,11 +425,6 @@ const CreateBotChatPreview = ({
                     </InputGroupButton>
                   </InputGroupAddon>
                 </InputGroup>
-                {chatError ? (
-                  <p className="mt-2 text-xs text-destructive" role="alert">
-                    {chatError}
-                  </p>
-                ) : null}
               </form>
             ) : (
               <form

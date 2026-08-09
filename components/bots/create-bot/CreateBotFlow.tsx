@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 
 import { createBot } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
@@ -26,10 +27,8 @@ const CreateBotFlow = ({ workspaceId }: CreateBotFlowProps) => {
   const [formData, setFormData] = useState<CreateBotFormData>(DEFAULT_BOT_FORM)
   const [createdBot, setCreatedBot] = useState<Bot | null>(null)
   const [isCreating, setIsCreating] = useState(false)
-  const [createError, setCreateError] = useState<string | null>(null)
 
   const handleBasicInfoComplete = async () => {
-    setCreateError(null)
     setIsCreating(true)
 
     try {
@@ -43,14 +42,14 @@ const CreateBotFlow = ({ workspaceId }: CreateBotFlowProps) => {
       })
 
       if (!result.success) {
-        setCreateError(formatApiError(result.error))
+        toast.error(formatApiError(result.error))
         return
       }
 
       setCreatedBot(result.data)
       setCurrentStep(2)
     } catch (error) {
-      setCreateError(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to create bot. Please try again.",
@@ -72,7 +71,6 @@ const CreateBotFlow = ({ workspaceId }: CreateBotFlowProps) => {
               onChange={setFormData}
               onComplete={handleBasicInfoComplete}
               isSubmitting={isCreating}
-              error={createError}
             />
           ) : null}
 

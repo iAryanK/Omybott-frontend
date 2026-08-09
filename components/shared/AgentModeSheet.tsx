@@ -11,6 +11,7 @@ import {
 
 import { formatApiError } from "@/lib/api"
 import { sendAgentChat } from "@/lib/api-client"
+import { toast } from "sonner"
 import { MarkdownMessage } from "@/components/shared/MarkdownMessage"
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
 import { Button } from "@/components/ui/button"
@@ -75,7 +76,6 @@ export function AgentModeSheet({ open, onOpenChange }: AgentModeSheetProps) {
   const [messages, setMessages] = useState<AgentMessage[]>([])
   const [inputValue, setInputValue] = useState("")
   const [isSending, setIsSending] = useState(false)
-  const [chatError, setChatError] = useState<string | null>(null)
 
   const canSend = inputValue.trim().length > 0 && !isSending
 
@@ -88,7 +88,6 @@ export function AgentModeSheet({ open, onOpenChange }: AgentModeSheetProps) {
   const handleReset = () => {
     setMessages([])
     setInputValue("")
-    setChatError(null)
   }
 
   const handleSend = async () => {
@@ -109,13 +108,12 @@ export function AgentModeSheet({ open, onOpenChange }: AgentModeSheetProps) {
 
     setMessages((current) => [...current, userMessage])
     setInputValue("")
-    setChatError(null)
     setIsSending(true)
 
     const result = await sendAgentChat(trimmedMessage)
 
     if (!result.success) {
-      setChatError(formatApiError(result.error))
+      toast.error(formatApiError(result.error))
       setMessages((current) =>
         current.filter((message) => message.id !== userMessage.id),
       )
@@ -272,11 +270,6 @@ export function AgentModeSheet({ open, onOpenChange }: AgentModeSheetProps) {
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-              {chatError ? (
-                <p className="mt-2 text-xs text-destructive" role="alert">
-                  {chatError}
-                </p>
-              ) : null}
             </form>
           </SheetFooter>
         </SheetContent>

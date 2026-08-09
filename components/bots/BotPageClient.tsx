@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 
 import BotDetails from "@/components/bots/BotDetails"
 import BotTabs from "@/components/bots/BotTabs"
@@ -25,31 +26,27 @@ const BotPageClient = ({ bot: initialBot }: BotPageClientProps) => {
   )
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const displayBot = isEditing ? formDataToBot(bot, formData) : bot
 
   const handleEdit = () => {
     setFormData(botToFormData(bot))
-    setError(null)
     setIsEditing(true)
   }
 
   const handleCancel = () => {
     setFormData(botToFormData(bot))
-    setError(null)
     setIsEditing(false)
   }
 
   const handleSave = async () => {
     setIsSaving(true)
-    setError(null)
 
     try {
       const result = await updateBot(bot.id, formDataToUpdateRequest(formData))
 
       if (!result.success) {
-        setError(formatApiError(result.error))
+        toast.error(formatApiError(result.error))
         return
       }
 
@@ -57,7 +54,7 @@ const BotPageClient = ({ bot: initialBot }: BotPageClientProps) => {
       setFormData(botToFormData(result.data))
       setIsEditing(false)
     } catch (saveError) {
-      setError(
+      toast.error(
         saveError instanceof Error
           ? saveError.message
           : "Failed to update bot. Please try again.",
@@ -77,7 +74,6 @@ const BotPageClient = ({ bot: initialBot }: BotPageClientProps) => {
         formData={formData}
         isEditing={isEditing}
         isSaving={isSaving}
-        error={error}
         onChange={setFormData}
         onEdit={handleEdit}
         onCancel={handleCancel}

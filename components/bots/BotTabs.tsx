@@ -13,7 +13,6 @@ type BotTabsProps = {
   formData: BotFormData
   isEditing: boolean
   isSaving: boolean
-  error: string | null
   onChange: (data: BotFormData) => void
   onEdit: () => void
   onCancel: () => void
@@ -36,7 +35,6 @@ const BotTabs = ({
   formData,
   isEditing,
   isSaving,
-  error,
   onChange,
   onEdit,
   onCancel,
@@ -67,7 +65,6 @@ const BotTabs = ({
             formData={formData}
             isEditing={isEditing}
             isSaving={isSaving}
-            error={error}
             onChange={onChange}
             onEdit={onEdit}
             onCancel={onCancel}

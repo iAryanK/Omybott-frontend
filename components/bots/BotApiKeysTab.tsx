@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { CodeIcon, CopyIcon, KeyIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { toast } from "sonner"
 
 import BotEmbedCodePanel from "@/components/bots/BotEmbedCodePanel"
 import type { BotFormData } from "@/components/bots/bot-form"
@@ -34,7 +35,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import {
@@ -78,17 +79,14 @@ function formatStatus(status: ApiKeyStatus) {
 const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
   const [apiKeys, setApiKeys] = useState<BotApiKey[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [keyName, setKeyName] = useState("")
-  const [createError, setCreateError] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [revealedKey, setRevealedKey] = useState<string | null>(null)
   const [revealedKeyDialogOpen, setRevealedKeyDialogOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [embedDialogOpen, setEmbedDialogOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<BotApiKey | null>(null)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const { apiBaseUrl, widgetBaseUrl } = getClientEmbedUrls()
@@ -114,12 +112,11 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
 
   const loadApiKeys = useCallback(async () => {
     setIsLoading(true)
-    setError(null)
 
     const result = await getBotApiKeys(botId)
 
     if (!result.success) {
-      setError(formatApiError(result.error))
+      toast.error(formatApiError(result.error))
       setApiKeys([])
     } else {
       setApiKeys(result.data)
@@ -134,18 +131,16 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
 
   const resetCreateForm = () => {
     setKeyName("")
-    setCreateError(null)
   }
 
   const handleCreate = async () => {
-    setCreateError(null)
     setIsCreating(true)
 
     try {
       const result = await createBotApiKey(botId, { name: keyName })
 
       if (!result.success) {
-        setCreateError(formatApiError(result.error))
+        toast.error(formatApiError(result.error))
         return
       }
 
@@ -156,7 +151,7 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
       setCopied(false)
       await loadApiKeys()
     } catch (createFailure) {
-      setCreateError(
+      toast.error(
         createFailure instanceof Error
           ? createFailure.message
           : "Failed to create API key. Please try again.",
@@ -175,6 +170,7 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
       await navigator.clipboard.writeText(revealedKey)
       setCopied(true)
     } catch {
+      toast.error("Failed to copy API key.")
       setCopied(false)
     }
   }
@@ -184,21 +180,20 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
       return
     }
 
-    setDeleteError(null)
     setIsDeleting(true)
 
     try {
       const result = await deleteBotApiKey(botId, deleteTarget.id)
 
       if (!result.success) {
-        setDeleteError(formatApiError(result.error))
+        toast.error(formatApiError(result.error))
         return
       }
 
       setDeleteTarget(null)
       await loadApiKeys()
     } catch (deleteFailure) {
-      setDeleteError(
+      toast.error(
         deleteFailure instanceof Error
           ? deleteFailure.message
           : "Failed to delete API key. Please try again.",
@@ -212,16 +207,6 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
     return (
       <div className="flex min-h-48 items-center justify-center py-8">
         <Spinner className="size-5" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="py-8">
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
       </div>
     )
   }
@@ -310,10 +295,7 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
                         variant="ghost"
                         size="icon-sm"
                         aria-label={`Delete ${apiKey.name}`}
-                        onClick={() => {
-                          setDeleteError(null)
-                          setDeleteTarget(apiKey)
-                        }}
+                        onClick={() => setDeleteTarget(apiKey)}
                       >
                         <Trash2Icon />
                       </Button>
@@ -355,7 +337,6 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
                 placeholder="Production website"
                 disabled={isCreating}
               />
-              {createError ? <FieldError>{createError}</FieldError> : null}
             </Field>
           </FieldGroup>
 
@@ -473,7 +454,6 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
         onOpenChange={(open) => {
           if (!open && !isDeleting) {
             setDeleteTarget(null)
-            setDeleteError(null)
           }
         }}
       >
@@ -488,11 +468,6 @@ const BotApiKeysTab = ({ botId, botConfig }: BotApiKeysTabProps) => {
               . Any integrations using this key will stop working.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {deleteError ? (
-            <p className="text-sm text-destructive" role="alert">
-              {deleteError}
-            </p>
-          ) : null}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction

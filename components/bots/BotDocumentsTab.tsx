@@ -7,6 +7,7 @@ import UploadBotDocumentsDialog from "@/components/bots/UploadBotDocumentsDialog
 import BotDocumentDetailDialog from "@/components/bots/BotDocumentDetailDialog"
 import { getBotDocuments } from "@/lib/api-client"
 import { formatApiError } from "@/lib/api"
+import { toast } from "sonner"
 import type { BotDocument, DocumentStatus } from "@/types/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -51,7 +52,6 @@ function formatStatus(status: DocumentStatus) {
 const BotDocumentsTab = ({ botId }: BotDocumentsTabProps) => {
   const [documents, setDocuments] = useState<BotDocument[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState<BotDocument | null>(
     null,
@@ -60,12 +60,11 @@ const BotDocumentsTab = ({ botId }: BotDocumentsTabProps) => {
 
   const loadDocuments = useCallback(async () => {
     setIsLoading(true)
-    setError(null)
 
     const result = await getBotDocuments(botId)
 
     if (!result.success) {
-      setError(formatApiError(result.error))
+      toast.error(formatApiError(result.error))
       setDocuments([])
     } else {
       setDocuments(result.data)
@@ -82,16 +81,6 @@ const BotDocumentsTab = ({ botId }: BotDocumentsTabProps) => {
     return (
       <div className="flex min-h-48 items-center justify-center py-8">
         <Spinner className="size-5" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="py-8">
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
       </div>
     )
   }

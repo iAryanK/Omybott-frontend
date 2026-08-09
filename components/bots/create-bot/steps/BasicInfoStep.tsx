@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
-  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
@@ -23,7 +22,6 @@ type BasicInfoStepProps = {
   onChange: (data: CreateBotFormData) => void
   onComplete: () => void | Promise<void>
   isSubmitting?: boolean
-  error?: string | null
 }
 
 const BASIC_INFO_FIELDS = [
@@ -70,7 +68,6 @@ const BasicInfoStep = ({
   onChange,
   onComplete,
   isSubmitting = false,
-  error = null,
 }: BasicInfoStepProps) => {
   const [currentFieldIndex, setCurrentFieldIndex] = useState(0)
   const [maxReachedIndex, setMaxReachedIndex] = useState(0)
@@ -318,7 +315,6 @@ const BasicInfoStep = ({
       </div>
 
       <div className="mt-6 flex flex-col items-end gap-2 pt-4">
-        {error ? <FieldError className="w-full">{error}</FieldError> : null}
         <Button
           type="button"
           onClick={() => void handleContinue()}

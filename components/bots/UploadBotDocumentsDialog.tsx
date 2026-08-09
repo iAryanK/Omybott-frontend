@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { FileTextIcon, Trash2Icon, UploadIcon } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   ACCEPTED_FILE_TYPES,
@@ -47,11 +48,9 @@ const UploadBotDocumentsDialog = ({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [files, setFiles] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const resetForm = () => {
     setFiles([])
-    setError(null)
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -73,11 +72,10 @@ const UploadBotDocumentsDialog = ({
     const invalidFiles = nextFiles.filter((file) => !isAcceptedFile(file))
 
     if (invalidFiles.length > 0) {
-      setError("Only PDF, TXT, and Markdown files are supported.")
+      toast.error("Only PDF, TXT, and Markdown files are supported.")
       return
     }
 
-    setError(null)
     setFiles((current) => {
       const existingNames = new Set(current.map((file) => file.name))
       const uniqueFiles = nextFiles.filter((file) => !existingNames.has(file.name))
@@ -91,11 +89,10 @@ const UploadBotDocumentsDialog = ({
 
   const handleUpload = async () => {
     if (files.length === 0) {
-      setError("Select at least one file to upload.")
+      toast.error("Select at least one file to upload.")
       return
     }
 
-    setError(null)
     setIsUploading(true)
 
     try {
@@ -106,12 +103,12 @@ const UploadBotDocumentsDialog = ({
         const result = await uploadBotDocument(botId, formData)
 
         if (!result.success) {
-          setError(`${file.name}: ${formatApiError(result.error)}`)
+          toast.error(`${file.name}: ${formatApiError(result.error)}`)
           return
         }
 
         if (result.data.status === "FAILED") {
-          setError(
+          toast.error(
             result.data.failureReason ??
               `${file.name} failed to process. Please try again.`,
           )
@@ -123,7 +120,7 @@ const UploadBotDocumentsDialog = ({
       onOpenChange(false)
       onUploaded()
     } catch (uploadError) {
-      setError(
+      toast.error(
         uploadError instanceof Error
           ? uploadError.message
           : "Failed to upload documents. Please try again.",
@@ -207,12 +204,6 @@ const UploadBotDocumentsDialog = ({
                 </Button>
               </>
             )}
-
-            {error ? (
-              <p className="text-sm text-destructive" role="alert">
-                {error}
-              </p>
-            ) : null}
           </div>
 
           <DialogFooter>
