@@ -114,7 +114,15 @@ const LoginForm = () => {
 
           <FieldSeparator>Or continue with</FieldSeparator>
 
-          <Button type="button" variant="outline" className="w-full" size="lg">
+          <Button 
+            type="button" 
+            variant="outline" 
+            className="w-full" 
+            size="lg"
+            onClick={() => {
+              window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/oauth2/authorization/google`
+            }}
+          >
             <Image src={"/google-icon.svg"} alt="Google" className="w-4 h-4" width={"50"} height={"50"} />
             Continue with Google
           </Button>

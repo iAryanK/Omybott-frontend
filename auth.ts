@@ -38,7 +38,37 @@ export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
         }
       },
     }),
-    // Google provider can be added here later, e.g. Google({ clientId, clientSecret })
+    Credentials({
+      id: "token-login",
+      name: "token-login",
+      credentials: {
+        accessToken: { label: "Access Token", type: "text" },
+        refreshToken: { label: "Refresh Token", type: "text" },
+      },
+      async authorize(credentials) {
+        const accessToken = credentials?.accessToken as string
+        const refreshToken = credentials?.refreshToken as string
+
+        if (!accessToken || !refreshToken) {
+          return null
+        }
+
+        try {
+          const user = await fetchCurrentUser(accessToken)
+          if (!user) {
+            return null
+          }
+
+          return {
+            ...user,
+            accessToken,
+            refreshToken,
+          }
+        } catch {
+          return null
+        }
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
