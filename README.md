@@ -1,9 +1,9 @@
 <div align="center">
   
   <!-- 📷 ADD YOUR LOGO HERE -->
-  <img src="https://via.placeholder.com/150/000000/FFFFFF?text=Omybott" alt="Omybott Logo" width="150" height="150" style="border-radius: 20px; margin-bottom: 20px;" />
+  <img src="./public/omybott_dark.png" alt="Omybott Logo" width="150" height="70" style="border-radius: 20px; margin-bottom: 20px;" />
 
-  # 🤖 Omybott Frontend
+  # Omybott (frontend)
 
   <p>
     <strong>A beautiful, responsive web interface for the Omybott RAG-based knowledge platform.</strong>
@@ -19,7 +19,6 @@
     <a href="#-getting-started">Getting Started</a>
   </p>
 
-  <!-- 🎥 ADD YOUR DEMO VIDEO OR HERO IMAGE HERE -->
   <a href="https://omybott.vercel.app">
     <img src="https://via.placeholder.com/800x450/1a1a1a/ffffff?text=Add+Your+Demo+Video+or+Hero+Image+Here" alt="Omybott Demo" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);" />
   </a>
@@ -78,9 +77,7 @@ Our frontend is built with a modern, type-safe, and highly optimized stack:
 | **Styling & UI** | [Tailwind CSS v4](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/) | Utility-first styling with accessible Radix UI components. |
 | **Authentication** | [NextAuth.js (v5)](https://authjs.dev/) | Secure, seamless user authentication flows. |
 | **Forms** | [React Hook Form](https://react-hook-form.com/) | Performant and flexible form handling. |
-| **Icons & Visuals** | [Lucide React](https://lucide.dev/), [Phosphor Icons](https://phosphoricons.com/), [Recharts](https://recharts.org/) | Beautiful iconography and interactive analytics. |
 | **Markdown** | `react-markdown`, `remark-gfm` | Rendering rich, formatted AI chat responses securely. |
-| **Deployment** | [Vercel](https://vercel.com/) | Fast, edge-optimized hosting and continuous deployment. |
 
 ---
 
@@ -93,10 +90,9 @@ Make sure you have the following installed:
 
 ### Installation
 
-1. Clone the repository and navigate to the frontend directory:
+1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd omybott/frontend
    ```
 
 2. Install dependencies:
