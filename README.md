@@ -19,9 +19,7 @@
     <a href="#-getting-started">Getting Started</a>
   </p>
 
-  <a href="https://omybott.vercel.app">
-    <img src="./public/omybott.png" alt="Omybott Web App" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);" />
-  </a>
+  [![Watch the video](https://img.youtube.com/vi/NwieQJ3P3k8/maxresdefault.jpg)](https://www.youtube.com/watch?v=NwieQJ3P3k8)
 </div>
 
 <br/>
