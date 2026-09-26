@@ -20,7 +20,7 @@
   </p>
 
   <a href="https://omybott.vercel.app">
-    <img src="https://via.placeholder.com/800x450/1a1a1a/ffffff?text=Add+Your+Demo+Video+or+Hero+Image+Here" alt="Omybott Demo" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);" />
+    <img src="./public/omybott.png" alt="Omybott Web App" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);" />
   </a>
 </div>
 
